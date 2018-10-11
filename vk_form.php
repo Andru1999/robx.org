@@ -1,11 +1,16 @@
 <?php
+require 'main/tallanto.php';
+
 if (!isset($_REQUEST)) {
     return;
 }
+
 //Строка для подтверждения адреса сервера из настроек Callback API
-$confirmation_token = 'e7e13fe2';
+$confirmation_token = 'd8v2ve07';
+
 //Получаем и декодируем уведомление
 $data = json_decode(file_get_contents('php://input'));
+
 //Проверяем, что находится в поле "type"
 switch ($data->type) {
 //Если это уведомление для подтверждения адреса...
@@ -13,7 +18,9 @@ switch ($data->type) {
         //...отправляем строку для подтверждения
         echo $confirmation_token;
         break;
+
     case 'lead_forms_new':
+        file_put_contents('tmp.txt',json_encode($data));
         if ($data->object->form_id != 1){break;}
         $first_name = NULL;
         $phone_number = NULL;
@@ -25,9 +32,8 @@ switch ($data->type) {
                 $phone_number = $el->answer;
             }
             if($first_name and $phone_number){
-                // отправляем данные. Пока заглушка
-                file_put_contents('result.txt', "$first_name $phone_number\n", FILE_APPEND);
-                
+                // отправляем данные.
+                enderToTallanto('Contact',$data);
                 echo 'ok';
                 break;
             }
